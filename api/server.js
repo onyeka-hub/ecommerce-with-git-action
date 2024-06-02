@@ -14,6 +14,11 @@ app.use(express.json());
 // Dummy database (replace with a real database in a production environment)
 let products = [];
 
+// Root URL route
+app.get('/', (req, res) => {
+    res.send('Hello, World!');
+});
+
 // Routes
 // Get all products
 app.get('/products', (req, res) => {
@@ -65,7 +70,12 @@ app.delete('/products/:id', (req, res) => {
     res.json({ message: 'Product deleted successfully' });
 });
 
-// Start the server
-module.exports = app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+// Export the app for testing purposes
+module.exports = app;
+
+// Start the server if this file is run directly
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+    });
+}
