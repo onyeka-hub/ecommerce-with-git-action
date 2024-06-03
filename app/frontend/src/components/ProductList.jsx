@@ -1,42 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { ListingContainer, ProductList, ProductItem } from '../styles/ProductListStyles';
+import React from 'react';
+import '../styles/ProductListStyles.css';
 
-const ProductListing = () => {
-  const [products, setProducts] = useState([]);
+const products = [
+  { id: 1, name: 'laptop', price: 10.99 },
+  { id: 2, name: 'HDD', price: 15.99 },
+  { id: 2, name: 'cable', price: 20.99 }
+];
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch('http://localhost:4000/products');
-        if (!response.ok) {
-          throw new Error('Failed to fetch products');
-        }
-        const data = await response.json();
-        setProducts(data);
-      } catch (error) {
-        console.error('Error fetching products:', error.message);
-      }
-    };
-
-    fetchData();
-
-    return () => {
-      // Cleanup (if needed)
-    };
-  }, []);
-
+function ProductList() {
   return (
-    <ListingContainer>
-      <h2 style={{textAlign:"center"}}>Products</h2>
-      <ProductList>
+    <div className="product-list">
+      <h2>Product List</h2>
+      <ul>
         {products.map((product) => (
-          <ProductItem key={product.id}>
+          <li key={product.id}>
             {product.name} - ${product.price}
-          </ProductItem>
+          </li>
         ))}
-      </ProductList>
-    </ListingContainer>
+      </ul>
+    </div>
   );
-};
+}
 
-export default ProductListing;
+export default ProductList;
