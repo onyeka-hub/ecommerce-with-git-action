@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import '../styles/ProductFormStyles.css';
+// import '../styles/ProductFormStyles.css';
 
 function ProductForm() {
   const [name, setName] = useState('');
