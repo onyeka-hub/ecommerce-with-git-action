@@ -32,12 +32,21 @@ jobs:
         run: npm install
         working-directory: app/frontend
 
-      # - name: Build frontend
-      #   run: npm run build
-      #   working-directory: app/frontend
-
     #   Run backend test
       - name: Run backend tests
         run: npm test
         working-directory: api
+
+    #   Run frontend test
+      # - name: Run frontend tests
+      #   run: npm test
+      #   working-directory: app/frontend
+
+      # - name: Build backend
+      #   run: npm run build
+      #   working-directory: api
+
+      # - name: Build frontend
+      #   run: npm run build
+      #   working-directory: app/frontend
 
