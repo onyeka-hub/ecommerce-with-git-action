@@ -42,9 +42,9 @@ jobs:
       #   run: npm test
       #   working-directory: app/frontend
 
-      # - name: Build backend
-      #   run: npm run build
-      #   working-directory: api
+      - name: Build backend
+        run: npm run build
+        working-directory: api
 
       # - name: Build frontend
       #   run: npm run build
