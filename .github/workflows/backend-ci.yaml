@@ -1,49 +1,70 @@
-name: Build and Push backend Image only when there is a code changes
-run-name: ${{ github.actor }} Build and Push backend Image to dockerhub
+name: Build, Push and Deploy backend Image to AWS
+run-name: ${{ github.actor }} Build and Push backend Image to AWS ECR
 
+# Trigger only when changes are made in the api directory and there is a push or 
+# pull request on the main branch
 on:
-    push:
-      paths: 
-        - 'api/**' # Trigger only when changes are made in the api directory
-    pull_request:
-      paths: 
-        - 'api/**'
+  push:
+    branches: 
+      - main
+    paths: 
+      - 'api/**' 
+  pull_request:
+    branches: 
+      - main
+    paths: 
+      - 'api/**'
 
 jobs:
-  build-and-push-backend:
+  build-and-push:
+    name: Build and Push to ECR
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '14'
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+        cache: 'npm'
+        cache-dependency-path: '**/package-lock.json'
 
-      # Install backend dependencies
-      - name: Install backend dependencies
-        run: npm install
-        working-directory: api
+    # Install backend dependencies
+    - name: Install backend dependencies
+      run: npm install
+      working-directory: api
 
-    #   Run backend test
-      - name: Run backend tests
-        run: npm test
-        working-directory: api
+  #   Run backend test
+    - name: Run backend tests
+      run: npm test
+      working-directory: api
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: eu-west-2
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Build and push Express app - ecommerce-backend
-        uses: docker/build-push-action@v4
-        with:
-          context: ./api
-          push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/ecommerce-backend:latest
+    - name: Automatic Tagging of Releases
+      id: increment-git-tag
+      run: |
+        bash ./build/git_update.sh -v patch
+
+    - name: Build, Tag, and Push backend Image to Amazon ECR
+      id: build-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: capstone-ecommerce-backend
+        IMAGE_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+      working-directory: api
+
+    
