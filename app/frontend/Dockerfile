@@ -16,7 +16,7 @@ COPY . .
 # Build the React application
 RUN npm run build
 
-# Expose port 3000 to the world
+# Expose the port
 EXPOSE 3000
 
 # Command to run the application
