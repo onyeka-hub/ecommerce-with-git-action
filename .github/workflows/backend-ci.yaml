@@ -2,7 +2,7 @@ name: Build, Push and Deploy backend Image to AWS
 run-name: ${{ github.actor }} Build and Push backend Image to AWS ECR
 
 # Trigger only when changes are made in the api directory and there is a push or 
-# pull request on the main branch
+# pull request on the main branch.
 on:
   push:
     branches: 
