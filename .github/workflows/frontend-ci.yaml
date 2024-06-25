@@ -1,5 +1,5 @@
 name: Build, Push and Deploy frontend Image to AWS
-run-name: ${{ github.actor }} Build and Push frontend Image to AWS ECR
+run-name: ${{ github.actor }} Build and Push frontend Image to AWS ECR and ECS
 
 # Trigger only when changes are made in the app/frontend directory for PR and there is a push 
 # on the main branch.
@@ -11,10 +11,18 @@ on:
     paths: 
       - 'app/frontend/**'
 
+env:
+  AWS_REGION: eu-west-2
+  ECS_CLUSTER: app_cluster
+  CONTAINER_NAME: frontend
+  ECS_SERVICE: app_service
+  ECS_TD: .github/workflows/td-frontend.json
+
 jobs:
   build-and-push:
-    name: Build and Push to ECR
+    name: Build and Push to ECR and ECS
     runs-on: ubuntu-latest
+    environment: dev
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -36,7 +44,7 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: eu-west-2
+        aws-region: ${{ env.AWS_REGION }}
 
     - name: Login to Amazon ECR
       id: login-ecr
@@ -56,4 +64,21 @@ jobs:
       run: |
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-      working-directory: app/frontend
+        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+      working-directory: app/frontend  
+
+    - name: Fill in the new image ID in the Amazon ECS task definition
+      id: task-def-1
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: ${{ env.ECS_TD }}
+        container-name: ${{ env.CONTAINER_NAME }}
+        image: ${{ steps.build-image.outputs.image }}
+
+    - name: Deploy Amazon ECS task definition
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: ${{ steps.task-def-1.outputs.task-definition }}
+        service: ${{ env.ECS_SERVICE }}
+        cluster: ${{ env.ECS_CLUSTER }}
+        wait-for-service-stability: true
