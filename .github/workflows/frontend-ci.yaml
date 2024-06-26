@@ -2,7 +2,7 @@ name: Build, Push and Deploy frontend Image to AWS
 run-name: ${{ github.actor }} Build and Push frontend Image to AWS ECR and ECS
 
 # Trigger only when changes are made in the app/frontend directory for PR and there is a push 
-# on the main branch.
+# and PR on the main branch.
 on:
   push:
     branches: 
