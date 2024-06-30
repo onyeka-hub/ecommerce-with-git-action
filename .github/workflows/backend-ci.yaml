@@ -1,7 +1,5 @@
 name: Build, Push and Deploy backend Image to AWS
 run-name: ${{ github.actor }} Build and Push backend Image to AWS ECR
-name: Build, Push and Deploy backend Image to AWS
-run-name: ${{ github.actor }} Build and Push backend Image to AWS ECR
 
 # Trigger only when changes are made in the api directory for PR and there is a push
 # and a PR on the main branch.
@@ -9,87 +7,39 @@ on:
   push:
     branches: 
       - main
-  pull_request:
-    paths: 
+    paths:
       - 'api/**'
-  push:
-    branches: 
-      - main
   pull_request:
+    branches:
+      - main
     paths: 
       - 'api/**'
 
 jobs:
   build-and-push:
     name: Build and Push to ECR
-  build-and-push:
-    name: Build and Push to ECR
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    - name: Checkout
-      uses: actions/checkout@v2
-
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '14'
-        cache: 'npm'
-        cache-dependency-path: '**/package-lock.json'
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '14'
-        cache: 'npm'
-        cache-dependency-path: '**/package-lock.json'
-
-    # Install backend dependencies
-    - name: Install backend dependencies
-      run: npm install
-      working-directory: api
-    # Install backend dependencies
-    - name: Install backend dependencies
-      run: npm install
-      working-directory: api
-
-  #   Run backend test
-    - name: Run backend tests
-      run: npm test
-      working-directory: api
-  #   Run backend test
-    - name: Run backend tests
-      run: npm test
-      working-directory: api
-
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: eu-west-2
-
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
-
-    - name: Automatic Tagging of Releases
-      id: increment-git-tag
-      run: |
-        bash ./build/git_update.sh -v patch
-
-    - name: Build, Tag, and Push backend Image to Amazon ECR
-      id: build-image
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: capstone-ecommerce-backend
-        IMAGE_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
-      run: |
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-      working-directory: api
-
     
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+        cache: 'npm'
+        cache-dependency-path: '**/package-lock.json'
+   
+    # Install backend dependencies
+    - name: Install backend dependencies
+      run: npm install
+      working-directory: api
+   
+  #   Run backend test
+    - name: Run backend tests
+      run: npm test
+      working-directory: api
+
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -116,5 +66,4 @@ jobs:
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
       working-directory: api
-
     
