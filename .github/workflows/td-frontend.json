@@ -3,7 +3,7 @@
     "containerDefinitions": [
         {
             "name": "frontend",
-            "image": "072824470958.dkr.ecr.eu-west-2.amazonaws.com/capstone-ecommerce-frontend:v0.1.2",
+            "image": "072824470958.dkr.ecr.eu-west-2.amazonaws.com/capstone-ecommerce-frontend",
             "cpu": 0,
             "portMappings": [
                 {
