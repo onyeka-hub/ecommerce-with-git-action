@@ -2,11 +2,13 @@ name: Build, Push and Deploy backend Image to AWS
 run-name: ${{ github.actor }} Build and Push backend Image to AWS ECR
 
 # Trigger only when changes are made in the api directory for PR and there is a push
-# on the main branch.
+# and a PR on the main branch.
 on:
   push:
     branches: 
       - main
+    paths:
+      - 'api/**'
   pull_request:
     paths: 
       - 'api/**'
@@ -18,19 +20,19 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-
+    
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
         node-version: '14'
         cache: 'npm'
         cache-dependency-path: '**/package-lock.json'
-
+   
     # Install backend dependencies
     - name: Install backend dependencies
       run: npm install
       working-directory: api
-
+   
   #   Run backend test
     - name: Run backend tests
       run: npm test
@@ -62,5 +64,4 @@ jobs:
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
       working-directory: api
-
     
